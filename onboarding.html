@@ -1,105 +1,482 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Last Modified Timestamp - Welcome</title>
     <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #eef2ff;
+            --success: #10b981;
+            --dark: #1f2937;
+            --gray: #9ca3af;
+            --light: #f9fafb;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: var(--dark);
             line-height: 1.6;
         }
 
         .container {
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 24px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            padding: 40px;
+            margin-bottom: 24px;
+            transition: transform 0.2s ease;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            height: 64px;
+            width: 64px;
+            background-color: var(--primary);
+            border-radius: 12px;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-icon {
+            color: white;
+            font-size: 32px;
         }
 
         h1 {
-            color: #1a73e8;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--dark);
+            margin: 0 0 12px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--gray);
+            max-width: 560px;
+            margin: 0 auto;
+        }
+
+        .step-container {
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            margin: 40px 0;
         }
 
         .step {
-            margin-bottom: 30px;
+            display: flex;
+            align-items: flex-start;
+            padding: 0;
         }
 
         .step-number {
-            display: inline-block;
-            background-color: #1a73e8;
-            color: white;
-            width: 30px;
-            height: 30px;
-            text-align: center;
-            line-height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            font-weight: 600;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            margin-right: 10px;
+            margin-right: 16px;
+            margin-top: 4px;
         }
 
-        .highlight {
-            background-color: #f5f5f5;
-            border-left: 4px solid #1a73e8;
-            padding: 16px;
-            margin: 16px 0;
+        .step-content {
+            flex-grow: 1;
+        }
+
+        .step-title {
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 8px;
         }
 
         .pin-instruction {
             display: flex;
-            align-items: center;
-            margin: 20px 0;
+            flex-direction: column;
+            margin-top: 16px;
         }
 
-        .pin-instruction img {
-            margin-right: 20px;
+        .pin-image {
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+            margin-bottom: 12px;
+            border: 1px solid #eee;
+        }
+
+        .pin-caption {
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .highlight {
+            background-color: var(--primary-light);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 36px;
+            display: flex;
+            align-items: center;
+        }
+
+        .highlight-icon {
+            background-color: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+        }
+
+        .highlight-text {
+            font-weight: 500;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+        }
+
+        .feature {
+            background-color: var(--light);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .feature-icon {
+            background-color: var(--primary-light);
+            color: var(--primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 12px;
+        }
+
+        .feature-text {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .intro-section {
+            margin: 0 0 32px;
+        }
+
+        .intro-section h2 {
+            font-size: 22px;
+            margin-bottom: 16px;
+            color: var(--dark);
+        }
+
+        .how-it-works {
+            margin-top: 48px;
+            border-top: 1px solid #eee;
+            padding-top: 40px;
+        }
+
+        .how-it-works h2 {
+            font-size: 22px;
+            margin-bottom: 16px;
+            color: var(--dark);
+        }
+
+        .logic-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin: 24px 0;
+        }
+
+        .logic-step {
+            display: flex;
+            gap: 16px;
+        }
+
+        .logic-number {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .logic-content {
+            flex-grow: 1;
+        }
+
+        .logic-content h3 {
+            font-size: 16px;
+            margin: 0 0 8px;
+            font-weight: 600;
+        }
+
+        .logic-content p {
+            margin: 0;
+            font-size: 15px;
+            color: #555;
+        }
+
+        code {
+            font-family: monospace;
+            background-color: #f1f5f9;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .note {
+            background-color: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 16px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 16px;
+        }
+
+        .note p {
+            margin: 0;
+            font-size: 15px;
+            color: #92400e;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 0 16px;
+                margin: 20px auto;
+            }
+
+            .card {
+                padding: 24px;
+            }
+
+            .step {
+                flex-direction: column;
+            }
+
+            .step-number {
+                margin-bottom: 12px;
+            }
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h1>Welcome to Last Modified Timestamp</h1>
-        <p>Thank you for installing Last Modified Timestamp! This extension helps you find when a webpage was last
-            updated.</p>
+        <div class="card">
+            <div class="header">
+                <div class="logo">
+                    <div class="logo-icon">⏱️</div>
+                </div>
+                <h1>Welcome to Last Modified Timestamp</h1>
+                <p class="subtitle">Track when web pages were last updated with this simple, powerful extension</p>
+            </div>
 
-        <div class="highlight">
-            <strong>For optimal experience, we recommend pinning this extension to your toolbar.</strong>
-        </div>
+            <div class="intro-section">
+                <h2>Why We Built This Extension</h2>
+                <p>Don't you hate it when you're on a webpage and you're unsure if the information is new or old?</p>
+                <p>Sadly, few websites clearly display when their content was last updated or modified. This can be
+                    frustrating when you need to know if you're looking at current information.</p>
+                <p>Last Modified Timestamp solves this problem by automatically detecting and displaying when a webpage
+                    was last updated, giving you confidence in the content you're reading.</p>
+            </div>
 
-        <div class="step">
-            <div class="step-number">1</div>
-            <strong>Click the extensions button in your Chrome toolbar</strong>
-            <div class="pin-instruction">
-                <img src="images/extension-menu.png" alt="Extensions menu" width="300">
-                <div>Find the Extensions puzzle icon in the top-right corner of Chrome</div>
+            <div class="highlight">
+                <div class="highlight-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <div class="highlight-text">
+                    For the best experience, we recommend pinning this extension to your toolbar for easy access.
+                </div>
+            </div>
+
+            <div class="step-container">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <div class="step-title">Click the extensions menu in Chrome</div>
+                        <p>Find the puzzle icon in the top-right corner of your browser</p>
+                        <div class="pin-instruction">
+                            <img src="images/extension-menu.png" alt="Extensions menu" class="pin-image">
+                            <div class="pin-caption">The extensions menu is where you can access all your installed
+                                Chrome extensions</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <div class="step-title">Pin Last Modified Timestamp to your toolbar</div>
+                        <p>Click the pin icon next to our extension to keep it visible at all times</p>
+                        <div class="pin-instruction">
+                            <img src="images/pin-extension.png" alt="Pin the extension" class="pin-image">
+                            <div class="pin-caption">Pinning gives you quick access to the extension's features from any
+                                webpage</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <div class="step-title">You're all set!</div>
+                        <p>The extension will automatically check for timestamps on every page you visit</p>
+
+                        <div class="features">
+                            <div class="feature">
+                                <div class="feature-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                                        <polyline points="13 2 13 9 20 9"></polyline>
+                                    </svg>
+                                </div>
+                                <div class="feature-text">Timestamp overlay appears automatically</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <polyline points="20 6 9 17 4 12"></polyline>
+                                    </svg>
+                                </div>
+                                <div class="feature-text">Green icon indicates timestamp found</div>
+                            </div>
+                            <div class="feature">
+                                <div class="feature-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                        <polyline points="21 15 16 10 5 21"></polyline>
+                                    </svg>
+                                </div>
+                                <div class="feature-text">Hover for detailed timestamp info</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p>You can click the extension icon anytime to manually check the current page or to access additional
+                options.</p>
+
+            <div class="how-it-works">
+                <h2>How the Extension Works</h2>
+                <p>We check every possible location where a timestamp might be stored, following a logical sequence from
+                    the most accurate sources to less reliable ones:</p>
+
+                <div class="logic-steps">
+                    <div class="logic-step">
+                        <div class="logic-number">1</div>
+                        <div class="logic-content">
+                            <h3>Meta <code>last-modified</code> Tag</h3>
+                            <p>First, we look for the official HTML meta tag specifically designed for last-modified
+                                timestamps.</p>
+                        </div>
+                    </div>
+
+                    <div class="logic-step">
+                        <div class="logic-number">2</div>
+                        <div class="logic-content">
+                            <h3>Other Meta Timestamps</h3>
+                            <p>We check for any meta tags with relevant "updated" or "modified" timestamps, including
+                                Open Graph (OG) tags/properties. If no match is found, we search again for a "published"
+                                timestamp.</p>
+                        </div>
+                    </div>
+
+                    <div class="logic-step">
+                        <div class="logic-number">3</div>
+                        <div class="logic-content">
+                            <h3>Schema.org Structured Data</h3>
+                            <p>For pages with structured data (schema), if the type is Article, BlogPosting, or similar,
+                                we look for a lastModified, dateUpdated, or datePublished property/value.</p>
+                        </div>
+                    </div>
+
+                    <div class="logic-step">
+                        <div class="logic-number">4</div>
+                        <div class="logic-content">
+                            <h3>HTML Content Patterns</h3>
+                            <p>We scan the page HTML for modified, updated, or published patterns in the content that
+                                contain a timestamp.</p>
+                        </div>
+                    </div>
+
+                    <div class="logic-step">
+                        <div class="logic-number">5</div>
+                        <div class="logic-content">
+                            <h3>HTTP <code>Last-Modified</code> Header</h3>
+                            <p>Finally, we check for this response header. If the value is the same as the current time
+                                or if the header doesn't exist, we treat it as "not found".</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="note">
+                    <p><strong>Note:</strong> Some webpages simply don't provide timestamp information in any form. In
+                        these cases, even our thorough checking can't find what doesn't exist.</p>
+                </div>
             </div>
         </div>
 
-        <div class="step">
-            <div class="step-number">2</div>
-            <strong>Pin the Last Modified Timestamp extension</strong>
-            <div class="pin-instruction">
-                <img src="images/pin-extension.png" alt="Pin the extension" width="300">
-                <div>Click the pin icon next to "Last Modified Timestamp" to keep it visible in your toolbar</div>
-            </div>
+        <div class="footer">
+            Last Modified Timestamp • By Brandon Scivolette • <a href="https://github.com/BrandonML?tab=repositories"
+                target="_blank" rel="noopener noreferrer" class="github-link">GitHub</a> • <a
+                href="https://gitlab.com/BrandonML" target="_blank" rel="noopener noreferrer"
+                class="gitlab-link">GitLab</a>
         </div>
-
-        <div class="step">
-            <div class="step-number">3</div>
-            <strong>That's it!</strong>
-            <p>The extension will automatically check for timestamps on each page you visit. You'll see:</p>
-            <ul>
-                <li>A temporary overlay in the top-right corner showing the timestamp</li>
-                <li>The extension icon will show a green checkmark if a timestamp is found</li>
-                <li>Hover over the icon to see the timestamp in a tooltip</li>
-            </ul>
-        </div>
-
-        <p>You can also click the extension icon anytime to recheck the current page.</p>
     </div>
-
 </body>
 
 </html>

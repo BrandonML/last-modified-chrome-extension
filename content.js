@@ -89,7 +89,7 @@ function checkLastModified() {
         const httpEquiv = meta.getAttribute('http-equiv');
         if (httpEquiv && httpEquiv.toLowerCase() === 'last-modified') {
             finalTimestamp = meta.getAttribute('content');
-            timestampSource = 'Meta tag';
+            timestampSource = 'Meta Tag';
             break;
         }
     }
@@ -114,7 +114,7 @@ function checkLastModified() {
         }
         if (!finalTimestamp && fallbackTimestamp) {
             finalTimestamp = fallbackTimestamp;
-            timestampSource = 'Meta fallback';
+            timestampSource = 'Meta Tag Fallback';
         }
     }
 
@@ -138,7 +138,7 @@ function checkLastModified() {
                 let foundDate = element.getAttribute('datetime') || element.textContent.trim();
                 if (foundDate) {
                     finalTimestamp = foundDate;
-                    timestampSource = 'Page content';
+                    timestampSource = 'Page Content';
                     break;
                 }
             }
@@ -157,7 +157,7 @@ function checkLastModified() {
                     const diffInMinutes = (now - lastModDate) / (1000 * 60);
                     if (diffInMinutes > 5) {
                         finalTimestamp = lastModifiedHeader;
-                        timestampSource = 'HTTP header';
+                        timestampSource = 'HTTP Last-Modified Header';
                     }
                 }
 
