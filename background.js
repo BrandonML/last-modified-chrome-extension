@@ -8,11 +8,15 @@ chrome.runtime.onInstalled.addListener((details) => {
     }
 });
 
-chrome.action.onClicked.addListener((tab) => {
-    chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        function: checkLastModified
-    });
+chrome.action.onClicked.addListener(async (tab) => {
+    try {
+        await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            files: ['content.js'] // Inject the content.js file
+        });
+    } catch (error) {
+        console.error("Error injecting content script:", error);
+    }
 });
 
 // Listen for messages from content script

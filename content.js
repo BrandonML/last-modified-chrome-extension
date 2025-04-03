@@ -1,4 +1,5 @@
-// content.js - Content script that runs on each page
+// content.js - Content script that runs on demand
+
 function formatDate(dateString) {
     try {
         const date = new Date(dateString);
@@ -57,7 +58,8 @@ function processStructuredData(data) {
     return null;
 }
 
-function checkLastModified() {
+// This function will be executed when the extension icon is clicked
+window.checkLastModified = function () {
     let finalTimestamp = null;
     let timestampSource = null;
 
@@ -213,7 +215,4 @@ function checkLastModified() {
             }, 500);
         }, 5000);
     }
-}
-
-// Auto-run when page loads
-checkLastModified();
+};
