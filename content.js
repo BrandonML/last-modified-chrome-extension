@@ -1,4 +1,5 @@
 // content.js - Content script that runs on demand
+console.log("Content script successfully injected and running.");
 
 function formatDate(dateString) {
     try {

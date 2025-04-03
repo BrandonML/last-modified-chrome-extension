@@ -9,13 +9,30 @@ chrome.runtime.onInstalled.addListener((details) => {
 });
 
 chrome.action.onClicked.addListener(async (tab) => {
-    try {
-        await chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            files: ['content.js'] // Inject the content.js file
-        });
-    } catch (error) {
-        console.error("Error injecting content script:", error);
+    if (tab.url.startsWith("http")) { // Ensure the tab is a valid webpage
+        try {
+            console.log("Injecting content.js into tab:", tab.id);
+            await chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                files: ['content.js']
+            });
+
+            // Call the checkLastModified function
+            await chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                func: () => {
+                    if (window.checkLastModified) {
+                        window.checkLastModified();
+                    } else {
+                        console.error("checkLastModified function not found.");
+                    }
+                }
+            });
+        } catch (error) {
+            console.error("Error injecting content script:", error);
+        }
+    } else {
+        console.warn("Cannot inject script into this tab:", tab.url);
     }
 });
 
