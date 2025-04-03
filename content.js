@@ -166,7 +166,7 @@ function checkLastModified() {
                     displayTimestamp(finalTimestamp, timestampSource, overlay);
                 } else {
                     overlay.textContent = 'No reliable timestamp found';
-                    overlay.style.backgroundColor = 'rgba(244, 67, 54, 0.7)';
+                    overlay.style.backgroundColor = 'rgba(244, 67, 54, 0.9)';
                     chrome.runtime.sendMessage({ timestamp: null });
                     setTimeout(() => {
                         overlay.style.opacity = '0';
@@ -182,7 +182,7 @@ function checkLastModified() {
                 console.error('Error checking HTTP headers:', error);
                 if (!finalTimestamp) {
                     overlay.textContent = 'No timestamp found';
-                    overlay.style.backgroundColor = 'rgba(244, 67, 54, 0.7)';
+                    overlay.style.backgroundColor = 'rgba(244, 67, 54, 0.9)';
                     chrome.runtime.sendMessage({ timestamp: null });
                     setTimeout(() => {
                         overlay.style.opacity = '0';
@@ -202,7 +202,7 @@ function checkLastModified() {
     function displayTimestamp(date, source, overlayElement) {
         const formattedDate = formatDate(date);
         overlayElement.innerHTML = `<strong>Last Modified:</strong><br><br>${formattedDate}<br><br><small>(${source})</small>`;
-        overlayElement.style.backgroundColor = 'rgba(33, 150, 243, 0.7)';
+        overlayElement.style.backgroundColor = 'rgba(33, 150, 243, 0.9)';
         chrome.runtime.sendMessage({ timestamp: formattedDate });
         setTimeout(() => {
             overlayElement.style.opacity = '0';
