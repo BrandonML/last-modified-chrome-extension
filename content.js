@@ -74,7 +74,7 @@ function checkLastModified() {
             color: white;
             padding: 8px 12px;
             border-radius: 4px;
-            font-size: 12px;
+            font-size: 14px;
             z-index: 9999;
             font-family: Arial, sans-serif;
             max-width: 300px;
@@ -201,7 +201,7 @@ function checkLastModified() {
 
     function displayTimestamp(date, source, overlayElement) {
         const formattedDate = formatDate(date);
-        overlayElement.innerHTML = `<strong>Last Modified:</strong><br>${formattedDate}<br><small>(${source})</small>`;
+        overlayElement.innerHTML = `<strong>Last Modified:</strong><br><br>${formattedDate}<br><br><small>(${source})</small>`;
         overlayElement.style.backgroundColor = 'rgba(33, 150, 243, 0.7)';
         chrome.runtime.sendMessage({ timestamp: formattedDate });
         setTimeout(() => {
@@ -211,7 +211,7 @@ function checkLastModified() {
                     overlayElement.parentNode.removeChild(overlayElement);
                 }
             }, 500);
-        }, 8000);
+        }, 5000);
     }
 }
 
