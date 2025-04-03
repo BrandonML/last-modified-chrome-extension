@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "Last Modified Timestamp",
-    "version": "9.0",
+    "version": "1.0.0",
     "description": "Displays the last modified timestamp of a webpage",
     "permissions": [
         "activeTab",
