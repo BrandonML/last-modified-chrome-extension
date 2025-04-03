@@ -1,6 +1,6 @@
 # Last Modified Timestamp
 
-> <strong>Heads up!</strong> This Chrome extension is currently under development and is not yet published on the Chrome Web Store. We're making some final adjustments to ensure it fully complies with the Chrome Web Store's permissions policy. Stay tuned for updates!
+> <strong>Heads up!</strong> This Chrome extension has been submitted for approval in the chrome web store.
 
 Tired of hunting around for when a webpage was last updated, only to come up empty? This Chrome extension has you covered!
 
