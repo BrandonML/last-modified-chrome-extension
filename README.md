@@ -16,6 +16,6 @@ Tired of hunting around for when a webpage was last updated, only to come up emp
 
 **In short, we go from the most authoritative sources to the less direct, giving you the best possible estimate of when a page was last changed.**
 
-**To Use:** Simply install the extension. When you're on a webpage and want to know the last modified date, click the extension icon. We'll do the rest!
+**To Use:** Simply install the extension. When you're on a webpage and want to know the last modified date, just **click the extension icon**. We'll do the rest! **You'll need to click the icon each time you want to check the last modified date** for a page.
 
 Let us know if you have any feedback or suggestions!
