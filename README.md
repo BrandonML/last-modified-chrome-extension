@@ -1,5 +1,9 @@
 # Last Modified Timestamp
 
+<div class="alert alert-warning">
+  <strong>Heads up!</strong> This Chrome extension is currently under development and is not yet published on the Chrome Web Store. We're making some final adjustments to ensure it fully complies with the Chrome Web Store's permissions policy. Stay tuned for updates!
+</div>
+
 Tired of hunting around for when a webpage was last updated, only to come up empty? This Chrome extension has you covered!
 
 **The Goal:** To surface the last modified timestamp of any webpage, even if it's not explicitly displayed. We dig deep so you don't have to!
