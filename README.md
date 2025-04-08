@@ -1,6 +1,6 @@
 # Last Modified Timestamp
 
-> <strong>Heads up!</strong> This Chrome extension has been submitted for approval in the chrome web store.
+> <strong>Published in Chrome Web Store</strong>: 4/7/2025.
 
 Tired of hunting around for when a webpage was last updated, only to come up empty? This Chrome extension has you covered!
 
