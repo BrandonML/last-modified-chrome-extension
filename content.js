@@ -1,68 +1,103 @@
 // content.js - Content script that runs on demand
 console.log("Content script successfully injected and running.");
 
-function formatDate(dateString) {
+async function formatDate(dateString) {
+    if (!dateString) return null;
     try {
         const date = new Date(dateString);
         if (isNaN(date)) return dateString;
 
-        return date.toLocaleString(undefined, {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
+        const settings = await new Promise(resolve => {
+            chrome.storage.sync.get({
+                dateFormat: 'YYYY-MM-DD',
+                timeFormat: '24-hour'
+            }, items => resolve(items));
         });
+
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+
+        let datePart;
+        switch (settings.dateFormat) {
+            case 'DD/MM/YYYY':
+                datePart = `${day}/${month}/${year}`;
+                break;
+            case 'MM/DD/YYYY':
+                datePart = `${month}/${day}/${year}`;
+                break;
+            case 'YYYY-MM-DD':
+            default:
+                datePart = `${year}-${month}-${day}`;
+                break;
+        }
+
+        let timePart;
+        if (settings.timeFormat === '12-hour') {
+            let hours = date.getHours();
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // hour '0' should be '12'
+            timePart = `${String(hours).padStart(2, '0')}:${minutes} ${ampm}`;
+        } else {
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            timePart = `${hours}:${minutes}`;
+        }
+
+        return `${datePart} ${timePart}`;
     } catch (e) {
+        console.error("Error formatting date:", e);
         return dateString;
     }
 }
 
 function findStructuredData() {
     const scripts = document.querySelectorAll('script[type="application/ld+json"]');
+    let results = { modified: null, published: null, type: null };
     for (const script of scripts) {
         try {
             const data = JSON.parse(script.textContent);
-            let result = processStructuredData(data);
-            if (result) return result;
+            processStructuredData(data, results);
         } catch (e) {
             console.error('Error parsing structured data:', e);
         }
     }
-    return null;
+    return results.modified || results.published ? results : null;
 }
 
-function processStructuredData(data) {
+function processStructuredData(data, results) {
     if (Array.isArray(data)) {
         for (const item of data) {
-            const result = processStructuredData(item);
-            if (result) return result;
+            processStructuredData(item, results);
         }
-        return null;
+        return;
     }
-    if (!data || typeof data !== 'object') return null;
+    if (!data || typeof data !== 'object') return;
+
     if (data['@type']) {
         const type = Array.isArray(data['@type']) ? data['@type'][0] : data['@type'];
-        if (data.dateModified) {
-            return { timestamp: data.dateModified, type: type };
+        if (!results.type) results.type = type;
+        if (data.dateModified && !results.modified) {
+            results.modified = data.dateModified;
         }
-        if (data.datePublished) {
-            return { timestamp: data.datePublished, type: type };
+        if (data.datePublished && !results.published) {
+            results.published = data.datePublished;
         }
     }
+
     for (const key in data) {
         if (typeof data[key] === 'object' && data[key] !== null) {
-            const result = processStructuredData(data[key]);
-            if (result) return result;
+            processStructuredData(data[key], results);
         }
     }
-    return null;
 }
 
 // This function will be executed when the extension icon is clicked
-window.checkLastModified = function () {
-    let finalTimestamp = null;
-    let timestampSource = null;
+window.findTimestamps = async function () {
+    let modifiedTimestamp = null, publishedTimestamp = null;
+    let modifiedSource = null, publishedSource = null;
 
     // Create overlay element
     let overlay = document.getElementById('last-modified-overlay');
@@ -86,127 +121,101 @@ window.checkLastModified = function () {
         document.body.appendChild(overlay);
     }
 
-    // Step 1: Check for <meta> last-modified tag
     const metaTags = document.querySelectorAll('meta');
+
+    // Step 1: Check for <meta> last-modified tag
     for (const meta of metaTags) {
         const httpEquiv = meta.getAttribute('http-equiv');
         if (httpEquiv && httpEquiv.toLowerCase() === 'last-modified') {
-            finalTimestamp = meta.getAttribute('content');
-            timestampSource = 'Meta Tag';
+            modifiedTimestamp = meta.getAttribute('content');
+            modifiedSource = 'Meta Tag';
             break;
         }
     }
 
     // Step 2: Check for other timestamps in meta tags
-    if (!finalTimestamp) {
-        let fallbackTimestamp = null;
-        for (const meta of metaTags) {
-            const property = meta.getAttribute('property') || meta.getAttribute('name');
-            if (property) {
-                const lowerProp = property.toLowerCase();
-                if (lowerProp === 'article:modified_time' || lowerProp === 'og:updated_time') {
-                    finalTimestamp = meta.getAttribute('content');
-                    timestampSource = 'Meta property';
-                    break;
-                } else if (lowerProp === 'article:published_time' || lowerProp === 'og:published_time' ||
-                    lowerProp === 'published_time' || lowerProp === 'publication_date' ||
-                    lowerProp === 'date' || lowerProp === 'dc.date') {
-                    fallbackTimestamp = meta.getAttribute('content');
-                }
+    for (const meta of metaTags) {
+        const property = meta.getAttribute('property') || meta.getAttribute('name');
+        if (property) {
+            const lowerProp = property.toLowerCase();
+            if (!modifiedTimestamp && (lowerProp === 'article:modified_time' || lowerProp === 'og:updated_time')) {
+                modifiedTimestamp = meta.getAttribute('content');
+                modifiedSource = 'Meta Property';
             }
-        }
-        if (!finalTimestamp && fallbackTimestamp) {
-            finalTimestamp = fallbackTimestamp;
-            timestampSource = 'Meta Tag Fallback';
+            if (!publishedTimestamp && (lowerProp === 'article:published_time' || lowerProp === 'og:published_time' || lowerProp === 'published_time' || lowerProp === 'publication_date' || lowerProp === 'date' || lowerProp === 'dc.date')) {
+                publishedTimestamp = meta.getAttribute('content');
+                publishedSource = 'Meta Property';
+            }
         }
     }
 
     // Step 3: Check for Schema.org structured data
-    if (!finalTimestamp) {
-        const structuredData = findStructuredData();
-        if (structuredData) {
-            finalTimestamp = structuredData.timestamp;
-            timestampSource = `Schema.org (${structuredData.type})`;
+    const structuredData = findStructuredData();
+    if (structuredData) {
+        if (!modifiedTimestamp && structuredData.modified) {
+            modifiedTimestamp = structuredData.modified;
+            modifiedSource = `Schema.org (${structuredData.type})`;
+        }
+        if (!publishedTimestamp && structuredData.published) {
+            publishedTimestamp = structuredData.published;
+            publishedSource = `Schema.org (${structuredData.type})`;
         }
     }
 
     // Step 4: Look for common timestamp patterns in HTML
-    if (!finalTimestamp) {
-        const datePatterns = [
-            document.querySelector('.post-date, .article-date, .publish-date, .timestamp, [itemprop="dateModified"], [itemprop="datePublished"]'),
-            document.querySelector('time')
-        ];
-        for (const element of datePatterns) {
-            if (element) {
-                let foundDate = element.getAttribute('datetime') || element.textContent.trim();
-                if (foundDate) {
-                    finalTimestamp = foundDate;
-                    timestampSource = 'Page Content';
-                    break;
-                }
+    if (!modifiedTimestamp) {
+        const modElement = document.querySelector('[itemprop="dateModified"], .post-date, .article-date, .updated, .date-modified');
+        if (modElement) {
+            modifiedTimestamp = modElement.getAttribute('datetime') || modElement.textContent.trim();
+            modifiedSource = 'Page Content';
+        }
+    }
+    if (!publishedTimestamp) {
+        const pubElement = document.querySelector('[itemprop="datePublished"], .publish-date, .timestamp, .date-published');
+        if (pubElement) {
+            publishedTimestamp = pubElement.getAttribute('datetime') || pubElement.textContent.trim();
+            publishedSource = 'Page Content';
+        }
+    }
+    if (!modifiedTimestamp && !publishedTimestamp) {
+        const timeElement = document.querySelector('time');
+        if (timeElement) {
+            const timestamp = timeElement.getAttribute('datetime') || timeElement.textContent.trim();
+            if (!publishedTimestamp) {
+                publishedTimestamp = timestamp;
+                publishedSource = 'Page Content (time tag)';
             }
         }
     }
 
-    // Step 5: Check HTTP headers using fetch (only Last-Modified) if no timestamp found yet
-    if (!finalTimestamp) {
-        fetch(window.location.href, { method: 'HEAD' })
-            .then(response => {
-                const lastModifiedHeader = response.headers.get('last-modified');
+    // Step 5: Check HTTP headers for Last-Modified (only if modified is still missing)
+    if (!modifiedTimestamp) {
+        try {
+            const response = await fetch(window.location.href, { method: 'HEAD' });
+            const lastModifiedHeader = response.headers.get('last-modified');
+            if (lastModifiedHeader) {
                 const now = new Date();
-
-                if (lastModifiedHeader) {
-                    const lastModDate = new Date(lastModifiedHeader);
-                    const diffInMinutes = (now - lastModDate) / (1000 * 60);
-                    if (diffInMinutes > 5) {
-                        finalTimestamp = lastModifiedHeader;
-                        timestampSource = 'HTTP Last-Modified Header';
-                    }
+                const lastModDate = new Date(lastModifiedHeader);
+                if ((now - lastModDate) / (1000 * 60) > 5) { // 5 minute threshold
+                    modifiedTimestamp = lastModifiedHeader;
+                    modifiedSource = 'HTTP Header';
                 }
-
-                // Finally, display the timestamp
-                if (finalTimestamp) {
-                    displayTimestamp(finalTimestamp, timestampSource, overlay);
-                } else {
-                    overlay.textContent = 'No reliable timestamp found';
-                    overlay.style.backgroundColor = 'rgba(244, 67, 54, 0.9)';
-                    chrome.runtime.sendMessage({ timestamp: null });
-                    setTimeout(() => {
-                        overlay.style.opacity = '0';
-                        setTimeout(() => {
-                            if (overlay.parentNode) {
-                                overlay.parentNode.removeChild(overlay);
-                            }
-                        }, 500);
-                    }, 5000);
-                }
-            })
-            .catch(error => {
-                console.error('Error checking HTTP headers:', error);
-                if (!finalTimestamp) {
-                    overlay.textContent = 'No timestamp found';
-                    overlay.style.backgroundColor = 'rgba(244, 67, 54, 0.9)';
-                    chrome.runtime.sendMessage({ timestamp: null });
-                    setTimeout(() => {
-                        overlay.style.opacity = '0';
-                        setTimeout(() => {
-                            if (overlay.parentNode) {
-                                overlay.parentNode.removeChild(overlay);
-                            }
-                        }, 500);
-                    }, 5000);
-                }
-            });
-    } else {
-        // If we found a timestamp in the DOM, display it immediately
-        displayTimestamp(finalTimestamp, timestampSource, overlay);
+            }
+        } catch (error) {
+            console.error('Error checking HTTP headers:', error);
+        }
     }
 
-    function displayTimestamp(date, source, overlayElement) {
-        const formattedDate = formatDate(date);
-        overlayElement.innerHTML = `<strong>Last Modified:</strong><br><br>${formattedDate}<br><br><small>(${source})</small>`;
-        overlayElement.style.backgroundColor = 'rgba(33, 150, 243, 0.9)';
-        chrome.runtime.sendMessage({ timestamp: formattedDate });
+    await displayTimestamps(overlay, publishedTimestamp, publishedSource, modifiedTimestamp, modifiedSource);
+};
+
+async function displayTimestamps(overlayElement, publishedTimestamp, publishedSource, modifiedTimestamp, modifiedSource) {
+    if (publishedTimestamp || modifiedTimestamp) {
+        await displayTimestamp(publishedTimestamp, publishedSource, modifiedTimestamp, modifiedSource, overlayElement);
+    } else {
+        overlayElement.textContent = 'No reliable timestamp found';
+        overlayElement.style.backgroundColor = 'rgba(244, 67, 54, 0.9)';
+        chrome.runtime.sendMessage({ published: null, modified: null });
         setTimeout(() => {
             overlayElement.style.opacity = '0';
             setTimeout(() => {
@@ -216,4 +225,34 @@ window.checkLastModified = function () {
             }, 500);
         }, 5000);
     }
-};
+}
+
+async function displayTimestamp(pubDate, pubSource, modDate, modSource, overlayElement) {
+    let html = '';
+    const formattedPubDate = await formatDate(pubDate);
+    if (formattedPubDate) {
+        html += `<strong>Published:</strong><br>${formattedPubDate}<br><small>(${pubSource})</small><br><br>`;
+    } else {
+         html += `<strong>Published:</strong><br>Not found<br><br>`;
+    }
+
+    const formattedModDate = await formatDate(modDate);
+    if (formattedModDate) {
+        html += `<strong>Last Modified:</strong><br>${formattedModDate}<br><small>(${modSource})</small>`;
+    } else {
+        html += `<strong>Last Modified:</strong><br>Not found`;
+    }
+
+    overlayElement.innerHTML = html;
+    overlayElement.style.backgroundColor = 'rgba(33, 150, 243, 0.9)';
+    chrome.runtime.sendMessage({ published: pubDate, modified: modDate });
+
+    setTimeout(() => {
+        overlayElement.style.opacity = '0';
+        setTimeout(() => {
+            if (overlayElement.parentNode) {
+                overlayElement.parentNode.removeChild(overlayElement);
+            }
+        }, 500);
+    }, 5000);
+}
