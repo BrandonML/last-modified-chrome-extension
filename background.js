@@ -17,14 +17,14 @@ chrome.action.onClicked.addListener(async (tab) => {
                 files: ['content.js']
             });
 
-            // Call the checkLastModified function
+            // Call the findTimestamps function
             await chrome.scripting.executeScript({
                 target: { tabId: tab.id },
                 func: () => {
-                    if (window.checkLastModified) {
-                        window.checkLastModified();
+                    if (window.findTimestamps) {
+                        window.findTimestamps();
                     } else {
-                        console.error("checkLastModified function not found.");
+                        console.error("findTimestamps function not found.");
                     }
                 }
             });
@@ -38,36 +38,23 @@ chrome.action.onClicked.addListener(async (tab) => {
 
 // Listen for messages from content script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.timestamp) {
-        // Update the extension badge with info
-        chrome.action.setBadgeText({
-            text: "✓",
-            tabId: sender.tab.id
-        });
+    const tabId = sender.tab.id;
+    if (message.published || message.modified) {
+        chrome.action.setBadgeText({ text: "✓", tabId: tabId });
+        chrome.action.setBadgeBackgroundColor({ color: "#4CAF50", tabId: tabId });
 
-        chrome.action.setBadgeBackgroundColor({
-            color: "#4CAF50",
-            tabId: sender.tab.id
-        });
+        let title = [];
+        if (message.published) {
+            title.push(`Published: ${new Date(message.published).toLocaleString()}`);
+        }
+        if (message.modified) {
+            title.push(`Modified: ${new Date(message.modified).toLocaleString()}`);
+        }
+        chrome.action.setTitle({ title: title.join('\n'), tabId: tabId });
 
-        chrome.action.setTitle({
-            title: `Last Modified: ${message.timestamp}`,
-            tabId: sender.tab.id
-        });
     } else {
-        chrome.action.setBadgeText({
-            text: "✗",
-            tabId: sender.tab.id
-        });
-
-        chrome.action.setBadgeBackgroundColor({
-            color: "#F44336",
-            tabId: sender.tab.id
-        });
-
-        chrome.action.setTitle({
-            title: "No timestamp found",
-            tabId: sender.tab.id
-        });
+        chrome.action.setBadgeText({ text: "✗", tabId: tabId });
+        chrome.action.setBadgeBackgroundColor({ color: "#F44336", tabId: tabId });
+        chrome.action.setTitle({ title: "No timestamp found", tabId: tabId });
     }
 });

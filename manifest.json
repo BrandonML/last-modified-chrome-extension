@@ -5,8 +5,10 @@
     "description": "Displays the last modified timestamp of a webpage",
     "permissions": [
         "activeTab",
-        "scripting"
+        "scripting",
+        "storage"
     ],
+    "options_page": "options.html",
     "action": {
         "default_icon": {
             "16": "images/icon16.png",
