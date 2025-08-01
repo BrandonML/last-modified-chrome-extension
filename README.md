@@ -1,6 +1,8 @@
 # Last Modified Timestamp
 
 > <strong>Published in Chrome Web Store</strong>: 4/7/2025.
+> 
+> <strong>v1.0.2 Released</strong>: 8/1/2025.
 
 Tired of hunting around for when a webpage was published or last updated? This Chrome extension has you covered!
 
