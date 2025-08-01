@@ -75,6 +75,28 @@
             margin: 0 auto;
         }
 
+        .options-card {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 40px 0;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .options-icon {
+            flex-shrink: 0;
+            background-color: var(--primary);
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         .step-container {
             display: flex;
             flex-direction: column;
@@ -310,17 +332,15 @@
                     <div class="logo-icon">⏱️</div>
                 </div>
                 <h1>Welcome to Last Modified Timestamp</h1>
-                <p class="subtitle">Track when web pages were last updated with this simple, powerful extension</p>
+                <p class="subtitle">Track when web pages were published or last updated with this simple, powerful extension.</p>
             </div>
 
             <div class="intro-section">
                 <h2>Why We Built This Extension</h2>
                 <p>Don't you hate it when you're on a webpage and you're unsure if the information is new or old?</p>
-                <p>Sadly, few websites clearly display when their content was last updated or modified. This can be
+                <p>Sadly, few websites clearly display when their content was published or last updated. This can be
                     frustrating when you need to know if you're looking at current information.</p>
-                <p>Last Modified Timestamp solves this problem by allowing you to easily check when a webpage was last
-                    updated. Simply click the extension icon to find out, giving you confidence in the content you're
-                    reading.</p>
+                <p>Last Modified Timestamp solves this problem by finding both the **published** and **last modified** dates of a page. Simply click the extension icon to find out, giving you confidence in the content you're reading.</p>
             </div>
 
             <div class="highlight">
@@ -342,7 +362,7 @@
                     <div class="step-number">1</div>
                     <div class="step-content">
                         <div class="step-title">Click the extensions menu in Chrome</div>
-                        <p>Find the puzzle icon in the top-right corner of your browser</p>
+                        <p>Find the puzzle icon in the top-right corner of your browser.</p>
                         <div class="pin-instruction">
                             <img src="images/extension-menu.png" alt="Extensions menu" class="pin-image">
                             <div class="pin-caption">The extensions menu is where you can access all your installed
@@ -355,7 +375,7 @@
                     <div class="step-number">2</div>
                     <div class="step-content">
                         <div class="step-title">Pin Last Modified Timestamp to your toolbar</div>
-                        <p>Click the pin icon next to our extension to keep it visible at all times</p>
+                        <p>Click the pin icon next to our extension to keep it visible at all times.</p>
                         <div class="pin-instruction">
                             <img src="images/pin-extension.png" alt="Pin the extension" class="pin-image">
                             <div class="pin-caption">Pinning gives you quick access to the extension's features from any
@@ -368,97 +388,58 @@
                     <div class="step-number">3</div>
                     <div class="step-content">
                         <div class="step-title">You're all set!</div>
-                        <p>To find the timestamp for a page, just click the extension icon. It will then check for
-                            timestamps; it won't automatically run on every page you visit.</p>
-
-                        <div class="features">
-                            <div class="feature">
-                                <div class="feature-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
-                                        <polyline points="13 2 13 9 20 9"></polyline>
-                                    </svg>
-                                </div>
-                                <div class="feature-text">Timestamp overlay appears automatically</div>
-                            </div>
-                            <div class="feature">
-                                <div class="feature-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <polyline points="20 6 9 17 4 12"></polyline>
-                                    </svg>
-                                </div>
-                                <div class="feature-text">Green icon indicates timestamp found</div>
-                            </div>
-                            <div class="feature">
-                                <div class="feature-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                                        stroke-linejoin="round">
-                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                        <polyline points="21 15 16 10 5 21"></polyline>
-                                    </svg>
-                                </div>
-                                <div class="feature-text">Hover for detailed timestamp info</div>
-                            </div>
-                        </div>
+                        <p>To find the timestamp for a page, just click the extension icon. The extension finds both "published" and "modified" dates, and you can customize the date/time format in the options.</p>
                     </div>
+                </div>
+            </div>
+
+            <div class="options-card">
+                <div class="options-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12.22 2h-4.44a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8.38"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z"/>
+                    </svg>
+                </div>
+                <div class="options-content">
+                    <h2>Customize Your Experience</h2>
+                    <p>You can set your preferred date and time format. Right-click the extension icon, select "Options", and choose the format that works best for you.</p>
                 </div>
             </div>
 
             <div class="how-it-works">
                 <h2>How the Extension Works</h2>
-                <p>We check every possible location where a timestamp might be stored, following a logical sequence from
-                    the most accurate sources to less reliable ones:</p>
+                <p>We intelligently scan the webpage for both **published** and **modified** timestamps, checking various locations where a date might be hiding. Our approach follows a logical sequence, prioritizing the most reliable sources first:</p>
 
                 <div class="logic-steps">
                     <div class="logic-step">
                         <div class="logic-number">1</div>
                         <div class="logic-content">
-                            <h3>Meta <code>last-modified</code> Tag</h3>
-                            <p>First, we look for the official HTML meta tag specifically designed for last-modified
-                                timestamps.</p>
+                            <h3>Meta Tags</h3>
+                            <p>We start by looking for direct indicators in the page's meta tags. This includes standard tags like <code>last-modified</code> as well as Open Graph (OG) tags like <code>og:updated_time</code> (for modified) and <code>og:published_time</code> (for published).</p>
                         </div>
                     </div>
 
                     <div class="logic-step">
                         <div class="logic-number">2</div>
                         <div class="logic-content">
-                            <h3>Other Meta Timestamps</h3>
-                            <p>We check for any meta tags with relevant "updated" or "modified" timestamps, including
-                                Open Graph (OG) tags/properties. If no match is found, we search again for a "published"
-                                timestamp.</p>
+                            <h3>Schema.org Structured Data</h3>
+                            <p>Next, we analyze any Schema.org structured data (in JSON-LD or microdata format). This often contains accurate <code>datePublished</code> and <code>dateModified</code> properties.</p>
                         </div>
                     </div>
 
                     <div class="logic-step">
                         <div class="logic-number">3</div>
                         <div class="logic-content">
-                            <h3>Schema.org Structured Data</h3>
-                            <p>For pages with structured data (schema), if the type is Article, BlogPosting, or similar,
-                                we look for a lastModified, dateUpdated, or datePublished property/value.</p>
+                            <h3>HTML Content Patterns</h3>
+                            <p>We search for HTML5 <code>&lt;time&gt;</code> elements and common phrases or CSS classes (like <code>.post-date</code> or <code>.updated</code>) that often indicate dates.</p>
                         </div>
                     </div>
 
                     <div class="logic-step">
                         <div class="logic-number">4</div>
                         <div class="logic-content">
-                            <h3>HTML Content Patterns</h3>
-                            <p>We scan the page HTML for modified, updated, or published patterns in the content that
-                                contain a timestamp.</p>
-                        </div>
-                    </div>
-
-                    <div class="logic-step">
-                        <div class="logic-number">5</div>
-                        <div class="logic-content">
                             <h3>HTTP <code>Last-Modified</code> Header</h3>
-                            <p>Finally, we check for this response header. If the value is the same as the current time
-                                or if the header doesn't exist, we treat it as "not found".</p>
+                            <p>As a final fallback for the <em>modified</em> date, we examine the <code>Last-Modified</code> header sent by the web server.</p>
                         </div>
                     </div>
                 </div>
