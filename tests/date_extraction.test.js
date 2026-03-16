@@ -183,6 +183,43 @@ describe('Priority Hierarchy Validation', () => {
         window.history.pushState({}, 'Test', oldPathname);
     });
 
+    test('Overlay has correct z-index', async () => {
+        await window.findTimestamps();
+        const overlay = document.getElementById('last-modified-overlay');
+        expect(overlay.style.zIndex).toBe('2147483647');
+    });
+
+    test('findStructuredData handles JSON with bad control characters', async () => {
+        // Mock console.error to avoid noise in test output
+        const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        document.head.innerHTML = `
+            <script type="application/ld+json">
+                {
+                    "@context": "https://schema.org",
+                    "@type": "Article",
+                    "headline": "Title with a
+newline",
+                    "dateModified": "2024-01-01T00:00:00Z"
+                }
+            </script>
+        `;
+
+        await window.findTimestamps();
+
+        // With the fix, it should NOT log an error anymore
+        expect(spy).not.toHaveBeenCalled();
+
+        // And it should correctly extract the date
+        expect(global.chrome.runtime.sendMessage).toHaveBeenCalledWith(
+            expect.objectContaining({
+                modified: "2024-01-01T00:00:00Z"
+            })
+        );
+
+        spy.mockRestore();
+    });
+
     test('Priority 4: Regex scan as fallback', async () => {
         document.body.innerHTML = `
             <div>Updated on 2021-01-01</div>
