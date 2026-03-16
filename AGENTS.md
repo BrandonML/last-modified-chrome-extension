@@ -40,3 +40,11 @@ Before approving any change, Jules must:
 - Create or update a `tests/date_extraction.test.js` file to cover any new logic.
 - Run `npm test` in its virtual environment.
 - If tests fail, Jules must attempt to fix the code and re-run tests until they pass.
+
+## Release & Versioning Protocol
+When Jules is tasked with "preparing a release" or merging a PR into `main`:
+1. **Auto-Increment:** Jules should increment the `version` field in `manifest.json`.
+   - Use `patch` (0.0.x) for bug fixes.
+   - Use `minor` (0.x.0) for new features.
+2. **Sync:** If a `package.json` exists, Jules must ensure both `manifest.json` and `package.json` have identical version numbers.
+3. **Validation:** Before committing the new version, Jules must verify the version string is valid (e.g., "1.0.1").
