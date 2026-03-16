@@ -4,10 +4,28 @@ console.log("Content script successfully injected and running.");
 function findDate(dateString) {
     if (!dateString) return null;
 
+    const now = new Date();
+    const futureThreshold = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24-hour buffer
+
+    // Try Unix timestamp (10 digits for seconds, 13 for milliseconds)
+    if (/^\d{10}$/.test(dateString)) {
+        let parsedDate = new Date(parseInt(dateString) * 1000);
+        if (!isNaN(parsedDate)) {
+            if (parsedDate > futureThreshold) return null;
+            return parsedDate;
+        }
+    } else if (/^\d{13}$/.test(dateString)) {
+        let parsedDate = new Date(parseInt(dateString));
+        if (!isNaN(parsedDate)) {
+            if (parsedDate > futureThreshold) return null;
+            return parsedDate;
+        }
+    }
+
     // Try ISO and standard JS Date parsing
     let parsedDate = new Date(dateString);
     if (!isNaN(parsedDate)) {
-        if (parsedDate > new Date()) return null; // Reject future dates
+        if (parsedDate > futureThreshold) return null; // Reject future dates
         return parsedDate;
     }
 

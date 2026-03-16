@@ -31,6 +31,17 @@ const contentModule = eval(`(function() {
     return module.exports;
 })()`);
 
+// Mock the system date to March 20, 2026, to ensure tests are stable and
+// the user's March 16, 2026 example is considered "past".
+beforeAll(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date('2026-03-20T12:00:00Z'));
+});
+
+afterAll(() => {
+    jest.useRealTimers();
+});
+
 describe('Date Extraction Logic (findDate)', () => {
     test('parses ISO strings', async () => {
         const isoString = '2026-03-16T15:00:00Z';
@@ -64,6 +75,18 @@ describe('Date Extraction Logic (findDate)', () => {
         const formatted = await contentModule.formatDate(futureDate.toISOString());
         // Since it returns null, it falls back to the original string
         expect(formatted).toBe(futureDate.toISOString());
+    });
+
+    test('parses Unix timestamps (seconds)', async () => {
+        const unixTimestamp = '1773652032'; // Mon Mar 16 2026 09:07:12 UTC
+        const formatted = await contentModule.formatDate(unixTimestamp);
+        expect(formatted).toContain('2026-03-16');
+    });
+
+    test('parses Unix timestamps (milliseconds)', async () => {
+        const unixTimestampMs = '1773652032000';
+        const formatted = await contentModule.formatDate(unixTimestampMs);
+        expect(formatted).toContain('2026-03-16');
     });
 });
 
