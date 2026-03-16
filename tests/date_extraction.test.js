@@ -57,6 +57,14 @@ describe('Date Extraction Logic (findDate)', () => {
 
         expect(formatted).toContain(`${year}-${month}-${day}`);
     });
+
+    test('ignores future dates', async () => {
+        const futureDate = new Date();
+        futureDate.setFullYear(futureDate.getFullYear() + 1);
+        const formatted = await contentModule.formatDate(futureDate.toISOString());
+        // Since it returns null, it falls back to the original string
+        expect(formatted).toBe(futureDate.toISOString());
+    });
 });
 
 describe('Priority Hierarchy Validation', () => {
@@ -120,6 +128,36 @@ describe('Priority Hierarchy Validation', () => {
                 modified: "2022-01-01T00:00:00Z"
             })
         );
+    });
+
+    test('Priority 4: URL scan as fallback before regex scan', async () => {
+        // Test using mock document body elements instead of window.location, which jsdom protects.
+        // The script checks window.location.pathname, we mock it globally on the module since the content.js
+        // is evaluated in its own scope and we can just pass the URL logic test here.
+        // Actually, let's execute the logic within our mocked JSDOM environment by just defining it on a
+        // new object if window.location can't be mocked. Wait, earlier we deleted window.location at the top level!
+
+        const oldPathname = window.location.pathname;
+
+        // To bypass jsdom's location lock, we can use history.pushState
+        window.history.pushState({}, 'Test', '/2023/10/15/my-article/');
+
+        document.body.innerHTML = `
+            <div>Updated on 2021-01-01</div>
+        `;
+        document.body.innerText = "Updated on 2021-01-01";
+
+        await window.findTimestamps();
+
+        expect(global.chrome.runtime.sendMessage).toHaveBeenCalledWith(
+            expect.objectContaining({
+                modified: "2021-01-01",
+                published: "2023-10-15T00:00:00.000Z" // From URL
+            })
+        );
+
+        // reset
+        window.history.pushState({}, 'Test', oldPathname);
     });
 
     test('Priority 4: Regex scan as fallback', async () => {
