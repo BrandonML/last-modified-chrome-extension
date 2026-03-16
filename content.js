@@ -6,7 +6,10 @@ function findDate(dateString) {
 
     // Try ISO and standard JS Date parsing
     let parsedDate = new Date(dateString);
-    if (!isNaN(parsedDate)) return parsedDate;
+    if (!isNaN(parsedDate)) {
+        if (parsedDate > new Date()) return null; // Reject future dates
+        return parsedDate;
+    }
 
     // Try relative dates like "2 days ago"
     const relativeMatch = dateString.toLowerCase().match(/^(\d+)\s+(second|minute|hour|day|week|month|year)s?\s+ago$/);
@@ -225,6 +228,19 @@ window.findTimestamps = async function () {
         if (pubElement && !publishedTimestamp) {
             publishedTimestamp = pubElement.getAttribute('datetime') || pubElement.textContent.trim();
             publishedSource = 'Page Content';
+        }
+
+        // Check URL for dates before full body scan
+        if (!publishedTimestamp && window.location && window.location.pathname) {
+            const urlDateRegex = /\/(20\d{2})\/(0[1-9]|1[0-2])\/(0[1-9]|[12]\d|3[01])/;
+            const match = window.location.pathname.match(urlDateRegex);
+            if (match) {
+                const urlDate = new Date(`${match[1]}-${match[2]}-${match[3]}T00:00:00Z`);
+                if (!isNaN(urlDate) && urlDate <= new Date()) {
+                    publishedTimestamp = urlDate.toISOString();
+                    publishedSource = 'URL Pattern';
+                }
+            }
         }
 
         // Regex scan for dates
