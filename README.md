@@ -1,7 +1,7 @@
-# Last Modified Timestamp
+# Page Timestamp Finder
 
 > <strong>Published in [Chrome Web Store](https://chromewebstore.google.com/detail/last-modified-timestamp/ilahbmmcmhcpjpfcgodgijbjadadicmg?pli=1)</strong>: 4/7/2025.
-> 
+>
 > <strong>v1.0.2 Released</strong>: 8/1/2025.
 
 Tired of hunting around for when a webpage was published or last updated? This [Chrome extension](https://chromewebstore.google.com/detail/last-modified-timestamp/ilahbmmcmhcpjpfcgodgijbjadadicmg?pli=1) has you covered!

@@ -8,16 +8,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/BrandonML/last-modified-chrome-extension.git"
+    "url": "git+https://github.com/BrandonML/page-timestamp-finder-chrome-extension.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/BrandonML/last-modified-chrome-extension/issues"
+    "url": "https://github.com/BrandonML/page-timestamp-finder-chrome-extension/issues"
   },
-  "homepage": "https://github.com/BrandonML/last-modified-chrome-extension#readme",
+  "homepage": "https://github.com/BrandonML/page-timestamp-finder-chrome-extension#readme",
   "devDependencies": {
     "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.29.0",

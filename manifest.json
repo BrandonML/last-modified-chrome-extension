@@ -1,8 +1,8 @@
 {
     "manifest_version": 3,
-    "name": "Last Modified Timestamp",
-    "version": "1.0.2",
-    "description": "Displays the last modified timestamp of a webpage",
+    "name": "Page Timestamp Finder",
+    "version": "1.2.0",
+    "description": "Finds and displays the published and modified/updated timestamp of a webpage",
     "permissions": [
         "activeTab",
         "scripting",
@@ -15,7 +15,7 @@
             "48": "images/icon48.png",
             "128": "images/icon128.png"
         },
-        "default_title": "Last Modified Timestamp"
+        "default_title": "Page Timestamp Finder"
     },
     "background": {
         "service_worker": "background.js"
