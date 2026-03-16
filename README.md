@@ -22,7 +22,8 @@ We intelligently scan the webpage for both **published** and **modified** timest
 1.  **Schema.org Structured Data:** First, we analyze any [Schema.org](https://schema.org/) structured data (in JSON-LD or microdata format) embedded in the page. This often contains the most accurate `datePublished` and `dateModified` properties directly from the author.
 2.  **Meta Tags:** Next, we look for direct indicators in the page's meta tags. This includes standard tags like `<meta name="last-modified" ...>` as well as [Open Graph (OG)](https://ogp.me/) tags like `og:updated_time` (for modified) and `og:published_time` (for published).
 3.  **HTML Content Patterns:** If the above checks don't yield a result, we start looking at the visible content of the page. We search for HTML5 `<time>` elements and common phrases or CSS classes (like `.post-date` or `.updated`) that often indicate dates.
-4.  **HTTP `Last-Modified` Header:** As a final fallback for the *modified* date, we examine the `Last-Modified` header sent by the web server. While this can sometimes be less precise, it can still provide a useful indication.
+4.  **URL Patterns:** If a publication date still hasn't been found, we scan the website's address (URL) for common date patterns (like `/2023/10/15/`) often used by blogs and news sites.
+5.  **HTTP `Last-Modified` Header:** As a final fallback for the *modified* date, we examine the `Last-Modified` header sent by the web server. While this can sometimes be less precise, it can still provide a useful indication.
 
 *(Note: We deliberately ignore some generic server headers and the system's "current time" to prevent the extension from incorrectly telling you an old article was just published "right now".)*
 
