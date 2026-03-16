@@ -123,18 +123,19 @@ window.findTimestamps = async function () {
 
     const metaTags = document.querySelectorAll('meta');
 
-    // Step 1: Check for <meta> last-modified tag
+    // Step 1: Check for timestamps in meta tags
     for (const meta of metaTags) {
         const httpEquiv = meta.getAttribute('http-equiv');
         if (httpEquiv && httpEquiv.toLowerCase() === 'last-modified') {
-            modifiedTimestamp = meta.getAttribute('content');
-            modifiedSource = 'Meta Tag';
-            break;
+            if (modifiedSource !== 'Meta Tag') {
+                const content = meta.getAttribute('content');
+                if (content) {
+                    modifiedTimestamp = content;
+                    modifiedSource = 'Meta Tag';
+                }
+            }
         }
-    }
 
-    // Step 2: Check for other timestamps in meta tags
-    for (const meta of metaTags) {
         const property = meta.getAttribute('property') || meta.getAttribute('name');
         if (property) {
             const lowerProp = property.toLowerCase();
@@ -146,6 +147,11 @@ window.findTimestamps = async function () {
                 publishedTimestamp = meta.getAttribute('content');
                 publishedSource = 'Meta Property';
             }
+        }
+
+        // Early break if we found both and modified is from the highest priority source (Meta Tag)
+        if (modifiedTimestamp && publishedTimestamp && modifiedSource === 'Meta Tag') {
+            break;
         }
     }
 
