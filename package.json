@@ -1,0 +1,24 @@
+{
+  "name": "last-modified-timestamp",
+  "version": "1.0.2",
+  "description": "Chrome extension to find the most reliable published and last modified timestamps of any webpage.",
+  "main": "background.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^30.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BrandonML/last-modified-chrome-extension.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/BrandonML/last-modified-chrome-extension/issues"
+  },
+  "homepage": "https://github.com/BrandonML/last-modified-chrome-extension#readme"
+}

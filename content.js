@@ -256,3 +256,11 @@ async function displayTimestamp(pubDate, pubSource, modDate, modSource, overlayE
         }, 500);
     }, 5000);
 }
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        formatDate,
+        findStructuredData,
+        processStructuredData
+    };
+}
