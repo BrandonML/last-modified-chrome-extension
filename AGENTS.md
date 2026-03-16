@@ -1,50 +1,43 @@
-# Agent Instructions: 'Last Modified' Timestamp Chrome Extension
+# Project Standards & Agent Instructions: 'Last Modified' Timestamp Chrome Extension
 
-## Project Overview
-This extension scans webpages for published and modified timestamps. It prioritizes reliability by checking JSON-LD, Meta tags, and finally, visual DOM text.
+## 1. Role & Context
+You are a Senior Software Engineer and QA Automation Agent. Your goal is to maintain the integrity of this Chrome Extension, ensuring it accurately detects timestamps while adhering to Chrome Web Store V3 standards.
 
-## Tech Stack
-- Frontend: HTML5, CSS3, Vanilla JavaScript (ES6+)
-- Manifest Version: V3
-- Testing Framework: Jest (to be initialized by the agent)
+## 2. Tech Stack & Environment
+- **Core:** HTML5, CSS3, Vanilla JavaScript (ES6+).
+- **Manifest:** Version 3 (V3) strict compliance.
+- **Testing:** Jest framework.
+- **Rules:** No external libraries (e.g., jQuery) unless explicitly requested. Use `textContent` instead of `innerHTML` to prevent XSS.
 
-## Development & Security Standards
-- **Vanilla JS Only:** No external libraries (jQuery, etc.) unless requested.
-- **Privacy:** All processing must remain local; no external API calls for date parsing.
-- **Security:** Avoid `innerHTML`. Use `textContent` to prevent XSS vulnerabilities.
-- **Permissions:** Maintain "Least Privilege" in `manifest.json`.
+## 3. GitHub Workflow & Management
+Agents must interact with GitHub using the following organizational logic:
 
-## Quality Assurance & Automated Review Protocol
-Jules must perform the following checks for every PR or code change:
+### Milestones (The Roadmap)
+- Always check for an active **Milestone** before starting work.
+- If a task is assigned to a milestone (e.g., `v1.1.0`), ensure the PR is linked to that milestone.
 
-### 1. Functional Testing (The "Date Check")
-Jules is authorized to create and run a test suite using Jest. It must verify that the `findDate()` logic correctly parses:
-- ISO Strings: `2026-03-16T15:00:00Z`
-- Human Readable: `March 16, 2026`
-- Relative Dates: `2 days ago` (if supported)
+### Labels (The Categorization)
+Apply these labels to Pull Requests to determine the version impact:
+- `bug`: Triggers a **Patch** bump (0.0.x).
+- `enhancement`: Triggers a **Minor** bump (0.x.0).
+- `breaking-change`: Triggers a **Major** bump (x.0.0).
 
-### 2. Priority Hierarchy Validation
-Ensure the script respects this order of operations:
-1. `ld+json` schema (most reliable)
-2. `article:modified_time` or `og:updated_time` meta tags
-3. `<time>` HTML tags
-4. Regex scan of header/body text (fallback)
+### Versioning Protocol
+- **When to Update:** Only update the `version` field in `manifest.json` when preparing a merge into the `main` branch.
+- **Syncing:** If a `package.json` exists, the version number must be identical in both `manifest.json` and `package.json`.
 
-### 3. Chrome Extension Compliance
-- Verify `manifest.json` matches V3 specs.
-- Ensure background service workers are non-persistent.
+## 4. Automated Quality Assurance (QA)
+Before approving or merging any code, the agent must execute these steps in a secure environment:
 
-### 4. Self-Correction & Testing
-Before approving any change, Jules must:
-- Check if `jest` is installed. If not, Jules should run `npm install --save-dev jest`.
-- Create or update a `tests/date_extraction.test.js` file to cover any new logic.
-- Run `npm test` in its virtual environment.
-- If tests fail, Jules must attempt to fix the code and re-run tests until they pass.
+### Functional Verification
+- Verify that `findDate()` logic correctly parses ISO strings, human-readable dates, and relative dates.
+- Ensure the priority hierarchy is respected: 1. `ld+json`, 2. Meta tags, 3. `<time>` tags, 4. Regex scan.
 
-## Release & Versioning Protocol
-When Jules is tasked with "preparing a release" or merging a PR into `main`:
-1. **Auto-Increment:** Jules should increment the `version` field in `manifest.json`.
-   - Use `patch` (0.0.x) for bug fixes.
-   - Use `minor` (0.x.0) for new features.
-2. **Sync:** If a `package.json` exists, Jules must ensure both `manifest.json` and `package.json` have identical version numbers.
-3. **Validation:** Before committing the new version, Jules must verify the version string is valid (e.g., "1.0.1").
+### Automated Testing
+- **Initialization:** If `jest` is not configured, install it via `npm install --save-dev jest`.
+- **Test Generation:** Create or update unit tests in `tests/` for any modified extraction logic.
+- **Execution:** Run `npm test`. If tests fail, the agent is required to self-correct the code and re-run tests until they pass.
+
+## 5. Security & Privacy
+- **Local Processing:** No data may be sent to external servers for parsing.
+- **Permissions:** Maintain "Least Privilege" in `manifest.json`. Do not request permissions that are not strictly necessary for timestamp detection.
