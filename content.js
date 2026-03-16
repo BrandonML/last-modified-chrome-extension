@@ -1,11 +1,40 @@
 // content.js - Content script that runs on demand
 console.log("Content script successfully injected and running.");
 
+function findDate(dateString) {
+    if (!dateString) return null;
+
+    // Try ISO and standard JS Date parsing
+    let parsedDate = new Date(dateString);
+    if (!isNaN(parsedDate)) return parsedDate;
+
+    // Try relative dates like "2 days ago"
+    const relativeMatch = dateString.toLowerCase().match(/^(\d+)\s+(second|minute|hour|day|week|month|year)s?\s+ago$/);
+    if (relativeMatch) {
+        const value = parseInt(relativeMatch[1]);
+        const unit = relativeMatch[2];
+        const now = new Date();
+
+        switch (unit) {
+            case 'second': now.setSeconds(now.getSeconds() - value); break;
+            case 'minute': now.setMinutes(now.getMinutes() - value); break;
+            case 'hour': now.setHours(now.getHours() - value); break;
+            case 'day': now.setDate(now.getDate() - value); break;
+            case 'week': now.setDate(now.getDate() - (value * 7)); break;
+            case 'month': now.setMonth(now.getMonth() - value); break;
+            case 'year': now.setFullYear(now.getFullYear() - value); break;
+        }
+        return now;
+    }
+
+    return null;
+}
+
 async function formatDate(dateString) {
     if (!dateString) return null;
     try {
-        const date = new Date(dateString);
-        if (isNaN(date)) return dateString;
+        const date = findDate(dateString);
+        if (!date) return dateString;
 
         const settings = await new Promise(resolve => {
             chrome.storage.sync.get({
@@ -121,69 +150,100 @@ window.findTimestamps = async function () {
         document.body.appendChild(overlay);
     }
 
-    const metaTags = document.querySelectorAll('meta');
-
-    // Step 1: Check for <meta> last-modified tag
-    for (const meta of metaTags) {
-        const httpEquiv = meta.getAttribute('http-equiv');
-        if (httpEquiv && httpEquiv.toLowerCase() === 'last-modified') {
-            modifiedTimestamp = meta.getAttribute('content');
-            modifiedSource = 'Meta Tag';
-            break;
-        }
-    }
-
-    // Step 2: Check for other timestamps in meta tags
-    for (const meta of metaTags) {
-        const property = meta.getAttribute('property') || meta.getAttribute('name');
-        if (property) {
-            const lowerProp = property.toLowerCase();
-            if (!modifiedTimestamp && (lowerProp === 'article:modified_time' || lowerProp === 'og:updated_time')) {
-                modifiedTimestamp = meta.getAttribute('content');
-                modifiedSource = 'Meta Property';
-            }
-            if (!publishedTimestamp && (lowerProp === 'article:published_time' || lowerProp === 'og:published_time' || lowerProp === 'published_time' || lowerProp === 'publication_date' || lowerProp === 'date' || lowerProp === 'dc.date')) {
-                publishedTimestamp = meta.getAttribute('content');
-                publishedSource = 'Meta Property';
-            }
-        }
-    }
-
-    // Step 3: Check for Schema.org structured data
+    // Priority 1: Check for Schema.org structured data (ld+json)
     const structuredData = findStructuredData();
     if (structuredData) {
-        if (!modifiedTimestamp && structuredData.modified) {
+        if (structuredData.modified) {
             modifiedTimestamp = structuredData.modified;
             modifiedSource = `Schema.org (${structuredData.type})`;
         }
-        if (!publishedTimestamp && structuredData.published) {
+        if (structuredData.published) {
             publishedTimestamp = structuredData.published;
             publishedSource = `Schema.org (${structuredData.type})`;
         }
     }
 
-    // Step 4: Look for common timestamp patterns in HTML
-    if (!modifiedTimestamp) {
+    // Priority 2: article:modified_time or og:updated_time meta tags
+    if (!modifiedTimestamp || !publishedTimestamp) {
+        const metaTags = document.querySelectorAll('meta');
+        for (const meta of metaTags) {
+            const property = meta.getAttribute('property') || meta.getAttribute('name');
+            const httpEquiv = meta.getAttribute('http-equiv');
+
+            if (httpEquiv && httpEquiv.toLowerCase() === 'last-modified' && !modifiedTimestamp) {
+                modifiedTimestamp = meta.getAttribute('content');
+                modifiedSource = 'Meta Tag';
+            }
+
+            if (property) {
+                const lowerProp = property.toLowerCase();
+                if (!modifiedTimestamp && (lowerProp === 'article:modified_time' || lowerProp === 'og:updated_time')) {
+                    modifiedTimestamp = meta.getAttribute('content');
+                    modifiedSource = 'Meta Property';
+                }
+                if (!publishedTimestamp && (lowerProp === 'article:published_time' || lowerProp === 'og:published_time' || lowerProp === 'published_time' || lowerProp === 'publication_date' || lowerProp === 'date' || lowerProp === 'dc.date')) {
+                    publishedTimestamp = meta.getAttribute('content');
+                    publishedSource = 'Meta Property';
+                }
+            }
+        }
+    }
+
+    // Priority 3: <time> HTML tags
+    if (!modifiedTimestamp || !publishedTimestamp) {
+        const timeElements = document.querySelectorAll('time');
+        for (const timeElement of timeElements) {
+            const timestamp = timeElement.getAttribute('datetime') || timeElement.textContent.trim();
+            // Try to figure out if it's published or modified based on class or text
+            const classList = timeElement.className.toLowerCase();
+            const textContent = timeElement.parentElement?.textContent.toLowerCase() || "";
+
+            if (!modifiedTimestamp && (classList.includes('mod') || classList.includes('update') || textContent.includes('update') || textContent.includes('modifi'))) {
+                modifiedTimestamp = timestamp;
+                modifiedSource = 'Page Content (time tag)';
+            } else if (!publishedTimestamp && (classList.includes('pub') || textContent.includes('publish') || textContent.includes('post'))) {
+                publishedTimestamp = timestamp;
+                publishedSource = 'Page Content (time tag)';
+            } else if (!publishedTimestamp) {
+                // Default to published if we don't know
+                publishedTimestamp = timestamp;
+                publishedSource = 'Page Content (time tag)';
+            }
+        }
+    }
+
+    // Priority 4: Regex scan of header/body text (fallback)
+    if (!modifiedTimestamp && !publishedTimestamp) {
+        // Fallback to older class-based querying first
         const modElement = document.querySelector('[itemprop="dateModified"], .post-date, .article-date, .updated, .date-modified');
-        if (modElement) {
+        if (modElement && !modifiedTimestamp) {
             modifiedTimestamp = modElement.getAttribute('datetime') || modElement.textContent.trim();
             modifiedSource = 'Page Content';
         }
-    }
-    if (!publishedTimestamp) {
+
         const pubElement = document.querySelector('[itemprop="datePublished"], .publish-date, .timestamp, .date-published');
-        if (pubElement) {
+        if (pubElement && !publishedTimestamp) {
             publishedTimestamp = pubElement.getAttribute('datetime') || pubElement.textContent.trim();
             publishedSource = 'Page Content';
         }
-    }
-    if (!modifiedTimestamp && !publishedTimestamp) {
-        const timeElement = document.querySelector('time');
-        if (timeElement) {
-            const timestamp = timeElement.getAttribute('datetime') || timeElement.textContent.trim();
-            if (!publishedTimestamp) {
-                publishedTimestamp = timestamp;
-                publishedSource = 'Page Content (time tag)';
+
+        // Regex scan for dates
+        if (!modifiedTimestamp || !publishedTimestamp) {
+            const bodyText = document.body.innerText || document.body.textContent;
+            // Matches something like "Published: Jan 1, 2023" or "Updated on 2023-01-01"
+            const dateRegex = /(?:published|posted|updated|modified)(?:\s+on|\s*:)?\s*([a-zA-Z]+\s+\d{1,2},?\s+\d{4}|\d{4}-\d{2}-\d{2}|\d{1,2}\/\d{1,2}\/\d{4})/gi;
+
+            let match;
+            while ((match = dateRegex.exec(bodyText)) !== null) {
+                const isUpdate = match[0].toLowerCase().includes('updat') || match[0].toLowerCase().includes('modif');
+                if (isUpdate && !modifiedTimestamp) {
+                    modifiedTimestamp = match[1];
+                    modifiedSource = 'Regex Scan';
+                } else if (!isUpdate && !publishedTimestamp) {
+                    publishedTimestamp = match[1];
+                    publishedSource = 'Regex Scan';
+                }
+                if (modifiedTimestamp && publishedTimestamp) break;
             }
         }
     }
@@ -255,4 +315,14 @@ async function displayTimestamp(pubDate, pubSource, modDate, modSource, overlayE
             }
         }, 500);
     }, 5000);
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {
+        formatDate,
+        findStructuredData,
+        processStructuredData,
+        displayTimestamps,
+        displayTimestamp
+    };
 }
