@@ -90,7 +90,10 @@ function findStructuredData() {
     let results = { modified: null, published: null, type: null };
     for (const script of scripts) {
         try {
-            const data = JSON.parse(script.textContent);
+            // Sanitize script content by replacing unescaped control characters (ASCII 0-31) with spaces
+            // This prevents JSON.parse from failing on things like literal newlines in strings.
+            const sanitizedContent = script.textContent.replace(/[\u0000-\u001F]/g, ' ');
+            const data = JSON.parse(sanitizedContent);
             processStructuredData(data, results);
         } catch (e) {
             console.error('Error parsing structured data:', e);
