@@ -145,7 +145,7 @@ window.findTimestamps = async function () {
             padding: 8px 12px;
             border-radius: 4px;
             font-size: 14px;
-            z-index: 9999;
+            z-index: 2147483647;
             font-family: Arial, sans-serif;
             max-width: 300px;
             transition: opacity 0.3s;
@@ -308,22 +308,35 @@ async function displayTimestamps(overlayElement, publishedTimestamp, publishedSo
 }
 
 async function displayTimestamp(pubDate, pubSource, modDate, modSource, overlayElement) {
-    let html = '';
-    const formattedPubDate = await formatDate(pubDate);
-    if (formattedPubDate) {
-        html += `<strong>Published:</strong><br>${formattedPubDate}<br><small>(${pubSource})</small><br><br>`;
-    } else {
-         html += `<strong>Published:</strong><br>Not found<br><br>`;
-    }
+    overlayElement.textContent = ''; // Clear previous content
 
-    const formattedModDate = await formatDate(modDate);
-    if (formattedModDate) {
-        html += `<strong>Last Modified:</strong><br>${formattedModDate}<br><small>(${modSource})</small>`;
-    } else {
-        html += `<strong>Last Modified:</strong><br>Not found`;
-    }
+    const createSection = async (label, date, source) => {
+        const container = document.createElement('div');
+        const strong = document.createElement('strong');
+        strong.textContent = label;
+        container.appendChild(strong);
+        container.appendChild(document.createElement('br'));
 
-    overlayElement.innerHTML = html;
+        const formattedDate = await formatDate(date);
+        if (formattedDate) {
+            container.appendChild(document.createTextNode(formattedDate));
+            container.appendChild(document.createElement('br'));
+            const small = document.createElement('small');
+            small.textContent = `(${source})`;
+            container.appendChild(small);
+        } else {
+            container.appendChild(document.createTextNode('Not found'));
+        }
+        return container;
+    };
+
+    const pubSection = await createSection('Published:', pubDate, pubSource);
+    overlayElement.appendChild(pubSection);
+    overlayElement.appendChild(document.createElement('br'));
+
+    const modSection = await createSection('Last Modified:', modDate, modSource);
+    overlayElement.appendChild(modSection);
+
     overlayElement.style.backgroundColor = 'rgba(33, 150, 243, 0.9)';
     chrome.runtime.sendMessage({ published: pubDate, modified: modDate });
 

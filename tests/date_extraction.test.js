@@ -160,6 +160,12 @@ describe('Priority Hierarchy Validation', () => {
         window.history.pushState({}, 'Test', oldPathname);
     });
 
+    test('Overlay has correct z-index', async () => {
+        await window.findTimestamps();
+        const overlay = document.getElementById('last-modified-overlay');
+        expect(overlay.style.zIndex).toBe('2147483647');
+    });
+
     test('Priority 4: Regex scan as fallback', async () => {
         document.body.innerHTML = `
             <div>Updated on 2021-01-01</div>
