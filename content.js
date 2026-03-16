@@ -209,6 +209,17 @@ window.findTimestamps = async function () {
     await displayTimestamps(overlay, publishedTimestamp, publishedSource, modifiedTimestamp, modifiedSource);
 };
 
+function removeOverlay(overlayElement) {
+    setTimeout(() => {
+        overlayElement.style.opacity = '0';
+        setTimeout(() => {
+            if (overlayElement.parentNode) {
+                overlayElement.parentNode.removeChild(overlayElement);
+            }
+        }, 500);
+    }, 5000);
+}
+
 async function displayTimestamps(overlayElement, publishedTimestamp, publishedSource, modifiedTimestamp, modifiedSource) {
     if (publishedTimestamp || modifiedTimestamp) {
         await displayTimestamp(publishedTimestamp, publishedSource, modifiedTimestamp, modifiedSource, overlayElement);
@@ -216,14 +227,7 @@ async function displayTimestamps(overlayElement, publishedTimestamp, publishedSo
         overlayElement.textContent = 'No reliable timestamp found';
         overlayElement.style.backgroundColor = 'rgba(244, 67, 54, 0.9)';
         chrome.runtime.sendMessage({ published: null, modified: null });
-        setTimeout(() => {
-            overlayElement.style.opacity = '0';
-            setTimeout(() => {
-                if (overlayElement.parentNode) {
-                    overlayElement.parentNode.removeChild(overlayElement);
-                }
-            }, 500);
-        }, 5000);
+        removeOverlay(overlayElement);
     }
 }
 
@@ -247,12 +251,5 @@ async function displayTimestamp(pubDate, pubSource, modDate, modSource, overlayE
     overlayElement.style.backgroundColor = 'rgba(33, 150, 243, 0.9)';
     chrome.runtime.sendMessage({ published: pubDate, modified: modDate });
 
-    setTimeout(() => {
-        overlayElement.style.opacity = '0';
-        setTimeout(() => {
-            if (overlayElement.parentNode) {
-                overlayElement.parentNode.removeChild(overlayElement);
-            }
-        }, 500);
-    }, 5000);
+    removeOverlay(overlayElement);
 }
