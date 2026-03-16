@@ -9,30 +9,51 @@ chrome.runtime.onInstalled.addListener((details) => {
 });
 
 chrome.action.onClicked.addListener(async (tab) => {
-    if (tab.url.startsWith("http")) { // Ensure the tab is a valid webpage
-        try {
-            console.log("Injecting content.js into tab:", tab.id);
-            await chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                files: ['content.js']
-            });
+    const url = tab?.url || '';
+    const tabId = tab?.id;
 
-            // Call the findTimestamps function
-            await chrome.scripting.executeScript({
-                target: { tabId: tab.id },
-                func: () => {
-                    if (window.findTimestamps) {
-                        window.findTimestamps();
-                    } else {
-                        console.error("findTimestamps function not found.");
-                    }
+    let protocol = '';
+
+    try {
+        protocol = new URL(url).protocol;
+    } catch (error) {
+        console.warn('Unsupported page for extension action: invalid or missing URL.', {
+            tabId,
+            url,
+            error
+        });
+        return;
+    }
+
+    if (!tabId || (protocol !== 'http:' && protocol !== 'https:')) {
+        console.warn('Unsupported page for extension action: only http/https tabs with valid IDs are supported.', {
+            tabId,
+            url,
+            protocol
+        });
+        return;
+    }
+
+    try {
+        console.log("Injecting content.js into tab:", tabId);
+        await chrome.scripting.executeScript({
+            target: { tabId },
+            files: ['content.js']
+        });
+
+        // Call the findTimestamps function
+        await chrome.scripting.executeScript({
+            target: { tabId },
+            func: () => {
+                if (window.findTimestamps) {
+                    window.findTimestamps();
+                } else {
+                    console.error("findTimestamps function not found.");
                 }
-            });
-        } catch (error) {
-            console.error("Error injecting content script:", error);
-        }
-    } else {
-        console.warn("Cannot inject script into this tab:", tab.url);
+            }
+        });
+    } catch (error) {
+        console.error("Error injecting content script:", error);
     }
 });
 
