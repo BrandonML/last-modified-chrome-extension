@@ -4,10 +4,28 @@ console.log("Content script successfully injected and running.");
 function findDate(dateString) {
     if (!dateString) return null;
 
+    const now = new Date();
+    const futureThreshold = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24-hour buffer
+
+    // Try Unix timestamp (10 digits for seconds, 13 for milliseconds)
+    if (/^\d{10}$/.test(dateString)) {
+        let parsedDate = new Date(parseInt(dateString) * 1000);
+        if (!isNaN(parsedDate)) {
+            if (parsedDate > futureThreshold) return null;
+            return parsedDate;
+        }
+    } else if (/^\d{13}$/.test(dateString)) {
+        let parsedDate = new Date(parseInt(dateString));
+        if (!isNaN(parsedDate)) {
+            if (parsedDate > futureThreshold) return null;
+            return parsedDate;
+        }
+    }
+
     // Try ISO and standard JS Date parsing
     let parsedDate = new Date(dateString);
     if (!isNaN(parsedDate)) {
-        if (parsedDate > new Date()) return null; // Reject future dates
+        if (parsedDate > futureThreshold) return null; // Reject future dates
         return parsedDate;
     }
 
@@ -308,22 +326,48 @@ async function displayTimestamps(overlayElement, publishedTimestamp, publishedSo
 }
 
 async function displayTimestamp(pubDate, pubSource, modDate, modSource, overlayElement) {
-    let html = '';
+    overlayElement.textContent = ''; // Clear existing content safely
+
+    const pubContainer = document.createElement('div');
+    const pubLabel = document.createElement('strong');
+    pubLabel.textContent = 'Published:';
+    pubContainer.appendChild(pubLabel);
+    pubContainer.appendChild(document.createElement('br'));
+
     const formattedPubDate = await formatDate(pubDate);
     if (formattedPubDate) {
-        html += `<strong>Published:</strong><br>${formattedPubDate}<br><small>(${pubSource})</small><br><br>`;
+        const dateText = document.createTextNode(formattedPubDate);
+        pubContainer.appendChild(dateText);
+        pubContainer.appendChild(document.createElement('br'));
+        const sourceElement = document.createElement('small');
+        sourceElement.textContent = `(${pubSource})`;
+        pubContainer.appendChild(sourceElement);
     } else {
-         html += `<strong>Published:</strong><br>Not found<br><br>`;
+        pubContainer.appendChild(document.createTextNode('Not found'));
     }
+    pubContainer.appendChild(document.createElement('br'));
+    pubContainer.appendChild(document.createElement('br'));
+    overlayElement.appendChild(pubContainer);
+
+    const modContainer = document.createElement('div');
+    const modLabel = document.createElement('strong');
+    modLabel.textContent = 'Last Modified:';
+    modContainer.appendChild(modLabel);
+    modContainer.appendChild(document.createElement('br'));
 
     const formattedModDate = await formatDate(modDate);
     if (formattedModDate) {
-        html += `<strong>Last Modified:</strong><br>${formattedModDate}<br><small>(${modSource})</small>`;
+        const dateText = document.createTextNode(formattedModDate);
+        modContainer.appendChild(dateText);
+        modContainer.appendChild(document.createElement('br'));
+        const sourceElement = document.createElement('small');
+        sourceElement.textContent = `(${modSource})`;
+        modContainer.appendChild(sourceElement);
     } else {
-        html += `<strong>Last Modified:</strong><br>Not found`;
+        modContainer.appendChild(document.createTextNode('Not found'));
     }
+    overlayElement.appendChild(modContainer);
 
-    overlayElement.innerHTML = html;
     overlayElement.style.backgroundColor = 'rgba(33, 150, 243, 0.9)';
     chrome.runtime.sendMessage({ published: pubDate, modified: modDate });
 
