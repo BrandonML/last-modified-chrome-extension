@@ -41,3 +41,22 @@ Before approving or merging any code, the agent must execute these steps in a se
 ## 5. Security & Privacy
 - **Local Processing:** No data may be sent to external servers for parsing.
 - **Permissions:** Maintain "Least Privilege" in `manifest.json`. Do not request permissions that are not strictly necessary for timestamp detection.
+
+## 6. Conflict Resolution & Synchronization
+When an agent encounters a merge conflict or discovers that the current task branch is out of sync with the `main` branch, the following steps must be taken to ensure code integrity:
+
+### 1. Rebase Strategy
+- **Prioritize Rebase:** The agent should perform a `git rebase main` rather than a `git merge main` to maintain a linear and clean project history.
+- **Upstream Alignment:** Before resolving conflicts, the agent must pull the latest changes from the remote `main` branch to ensure it is working against the most recent source of truth.
+
+### 2. Manual Conflict Logic
+- **Contextual Awareness:** During a conflict, the agent must analyze the logic on `main` to understand why it was changed.
+- **Preservation:** Do not blindly overwrite changes on `main`. Ensure that existing bug fixes or features merged by other sessions are preserved while integrating the new task's improvements.
+- **Code Style:** Ensure that the resolution follows the established coding patterns (Vanilla JS, `textContent`, etc.) defined in Section 2.
+
+### 3. Verification Post-Sync
+- **Regression Testing:** Immediately following a successful rebase and conflict resolution, the agent must execute the full test suite (`npm test`).
+- **Functional Check:** The agent should manually (via script or internal simulation) verify that the core `findDate()` extraction logic still functions as intended and that the "current time" fallback bug has not been re-introduced.
+
+### 4. Communication
+- **Documentation:** The agent should provide a brief summary of how the conflict was resolved in the PR comment or task reply, noting any significant architectural decisions made during the sync.
