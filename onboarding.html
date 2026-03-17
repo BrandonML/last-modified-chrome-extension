@@ -414,21 +414,23 @@
                     <div class="logic-step">
                         <div class="logic-number">1</div>
                         <div class="logic-content">
-                            <h3>Meta Tags</h3>
-                            <p>We start by looking for direct indicators in the page's meta tags. This includes standard
-                                tags like <code>last-modified</code> as well as Open Graph (OG) tags like
-                                <code>og:updated_time</code> (for modified) and <code>og:published_time</code> (for
-                                published).</p>
+                            <h3>Schema.org Structured Data</h3>
+                            <p>First, we analyze any <a href="https://schema.org/" target="_blank">Schema.org</a>
+                                structured data (in JSON-LD or microdata format) embedded in the page. This often
+                                contains the most accurate <code>datePublished</code> and <code>dateModified</code>
+                                properties directly from the author. Content is securely sanitized to handle malformed
+                                control characters.</p>
                         </div>
                     </div>
 
                     <div class="logic-step">
                         <div class="logic-number">2</div>
                         <div class="logic-content">
-                            <h3>Schema.org Structured Data</h3>
-                            <p>Next, we analyze any Schema.org structured data (in JSON-LD or microdata format). This
-                                often contains accurate <code>datePublished</code> and <code>dateModified</code>
-                                properties.</p>
+                            <h3>Meta Tags</h3>
+                            <p>Next, we look for direct indicators in the page's meta tags. This includes standard tags
+                                like <code>last-modified</code> as well as <a href="https://ogp.me/"
+                                    target="_blank">Open Graph (OG)</a> tags like <code>og:updated_time</code> (for
+                                modified) and <code>og:published_time</code> (for published).</p>
                         </div>
                     </div>
 
@@ -436,24 +438,45 @@
                         <div class="logic-number">3</div>
                         <div class="logic-content">
                             <h3>HTML Content Patterns</h3>
-                            <p>We search for HTML5 <code>&lt;time&gt;</code> elements and common phrases or CSS classes
-                                (like <code>.post-date</code> or <code>.updated</code>) that often indicate dates.</p>
+                            <p>If the above checks don't yield a result, we start looking at the visible content of the
+                                page. We search for HTML5 <code>&lt;time&gt;</code> elements and common phrases or CSS
+                                classes (like <code>.post-date</code> or <code>.updated</code>) that often indicate
+                                dates.</p>
                         </div>
                     </div>
 
                     <div class="logic-step">
                         <div class="logic-number">4</div>
                         <div class="logic-content">
+                            <h3>URL Patterns</h3>
+                            <p>If a publication date still hasn't been found, we scan the website's address (URL) for
+                                common date patterns (like <code>/2023/10/15/</code>) often used by blogs and news
+                                sites.</p>
+                        </div>
+                    </div>
+
+                    <div class="logic-step">
+                        <div class="logic-number">5</div>
+                        <div class="logic-content">
+                            <h3>Unix Timestamp Parsing</h3>
+                            <p>Supports scanning structured elements and page content for both 10-digit (seconds) and
+                                13-digit (milliseconds) Unix timestamps.</p>
+                        </div>
+                    </div>
+
+                    <div class="logic-step">
+                        <div class="logic-number">6</div>
+                        <div class="logic-content">
                             <h3>HTTP <code>Last-Modified</code> Header</h3>
                             <p>As a final fallback for the <em>modified</em> date, we examine the
-                                <code>Last-Modified</code> header sent by the web server.</p>
+                                <code>Last-Modified</code> header sent by the web server. While this can sometimes be
+                                less precise, it can still provide a useful indication.</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="note">
-                    <p><strong>Note:</strong> Some webpages simply don't provide timestamp information in any form. In
-                        these cases, even our thorough checking can't find what doesn't exist.</p>
+                    <p><strong>Note:</strong> We deliberately ignore some generic server headers and the system's "current time" to prevent incorrect publication dates. We also reject dates that appear to be in the future.</p>
                 </div>
             </div>
         </div>
