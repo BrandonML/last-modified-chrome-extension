@@ -1,4 +1,20 @@
 // background.js - Background service worker
+
+/**
+ * Sanitizes a URL by removing query parameters and fragments to prevent sensitive data exposure.
+ * @param {string} url The URL to sanitize.
+ * @returns {string} The sanitized URL.
+ */
+function sanitizeUrl(url) {
+    if (!url) return '';
+    try {
+        const parsed = new URL(url);
+        return `${parsed.protocol}//${parsed.host}${parsed.pathname}`;
+    } catch (e) {
+        return '[INVALID URL]';
+    }
+}
+
 // Open onboarding page on install
 chrome.runtime.onInstalled.addListener((details) => {
     if (details.reason === 'install') {
@@ -19,8 +35,7 @@ chrome.action.onClicked.addListener(async (tab) => {
     } catch (error) {
         console.warn('Unsupported page for extension action: invalid or missing URL.', {
             tabId,
-            url,
-            error
+            url: sanitizeUrl(url)
         });
         return;
     }
@@ -28,7 +43,7 @@ chrome.action.onClicked.addListener(async (tab) => {
     if (!tabId || (protocol !== 'http:' && protocol !== 'https:')) {
         console.warn('Unsupported page for extension action: only http/https tabs with valid IDs are supported.', {
             tabId,
-            url,
+            url: sanitizeUrl(url),
             protocol
         });
         return;
@@ -53,7 +68,7 @@ chrome.action.onClicked.addListener(async (tab) => {
             }
         });
     } catch (error) {
-        console.error("Error injecting content script:", error);
+        console.error("Error injecting content script into " + sanitizeUrl(url) + ":", error.message || error);
     }
 });
 

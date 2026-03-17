@@ -1,4 +1,20 @@
 // content.js - Content script that runs on demand
+
+/**
+ * Sanitizes a URL by removing query parameters and fragments to prevent sensitive data exposure.
+ * @param {string} url The URL to sanitize.
+ * @returns {string} The sanitized URL.
+ */
+function sanitizeUrl(url) {
+    if (!url) return '';
+    try {
+        const parsed = new URL(url);
+        return `${parsed.protocol}//${parsed.host}${parsed.pathname}`;
+    } catch (e) {
+        return '[INVALID URL]';
+    }
+}
+
 console.log("Content script successfully injected and running.");
 
 function findDate(dateString) {
@@ -148,7 +164,8 @@ function processStructuredData(data, results) {
 }
 
 // This function will be executed when the extension icon is clicked
-window.findTimestamps = async function () {
+if (typeof window !== 'undefined') {
+    window.findTimestamps = async function () {
     let modifiedTimestamp = null, publishedTimestamp = null;
     let modifiedSource = null, publishedSource = null;
 
@@ -299,12 +316,13 @@ window.findTimestamps = async function () {
                 }
             }
         } catch (error) {
-            console.error('Error checking HTTP headers:', error);
+            console.error('Error checking HTTP headers for ' + sanitizeUrl(window.location.href) + ':', error.message || error);
         }
     }
 
-    await displayTimestamps(overlay, publishedTimestamp, publishedSource, modifiedTimestamp, modifiedSource);
-};
+        await displayTimestamps(overlay, publishedTimestamp, publishedSource, modifiedTimestamp, modifiedSource);
+    };
+}
 
 function removeOverlay(overlayElement) {
     setTimeout(() => {
@@ -366,6 +384,7 @@ async function displayTimestamp(pubDate, pubSource, modDate, modSource, overlayE
 
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
+        sanitizeUrl,
         formatDate,
         findStructuredData,
         processStructuredData,
